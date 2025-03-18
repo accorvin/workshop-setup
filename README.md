@@ -6,6 +6,10 @@ Instructions for OpenShift AI artifact creation from the CLI were copied from [h
 
 ## Setting up the workshop environment for users
 
+**Important** If you haven't already created the cluster and set up the
+custom workbench image, do those steps first by following the instructions
+in the second half of this README.
+
 ### Users List
 
 A list of GitHub usernames for workshop participants can be found in [users_list.txt](users_list.txt). To
@@ -39,6 +43,11 @@ Using project "default".
 ```
 
 ### Run the Workshop Setup Script
+
+First, you will need to set two environment variables, `S3_KEY`, and `S3_SECRET` that
+will be used to create OpenShift secrets in each participant's project and then pull
+workshop data from cloud object storage. The values for these credentials can be found
+in the sample script [here](https://ibm-research.slack.com/archives/C083XGN35DM/p1742320250275449) 
 
 To run the script to prepare the workshop environment for participants, perform the following: (these
 steps were developed using python version 3.11))
@@ -144,3 +153,68 @@ rosa create machinepool \
   --instance-type g4dn.12xlarge \
   --replicas 1
 ```
+
+## Custom Workbench Image
+
+To facilitate initializing a workbench environment for participants in which
+all prerequisites are already installed, we'll use a custom workbench image for
+this workshop.
+
+The container file (AKA Dockerfile) for this workbench image can be found in
+[workbench-notebook.CONTAINERFILE](workbench-notebook.CONTAINERFILE).
+
+It was built with a command like:
+
+```
+podman build -t quay.io/accorvin/ai-for-good-workshop:v2 -f workbench-notebook.CONTAINERFILE .
+```
+
+Then pushed to Quay via:
+
+```
+podman push quay.io/accorvin/ai-for-good-workshop:v2
+```
+
+Then, an image stream was created on the OpenShift cluster to
+make this workbench image available to individual workbenches by running the following
+command:
+
+```
+cat <<EOF | oc apply -f -
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  annotations:
+    opendatahub.io/notebook-image-desc: ""
+    opendatahub.io/notebook-image-name: ai-for-good-workshop
+    opendatahub.io/notebook-image-url: quay.io/accorvin/ai-for-good-workshop:v2
+    opendatahub.io/recommended-accelerators: '["nvidia.com/gpu"]'
+  labels:
+    app.kubernetes.io/created-by: byon
+    opendatahub.io/dashboard: "true"
+    opendatahub.io/notebook-image: "true"
+  name: ai-for-good-workshop
+  namespace: redhat-ods-applications
+spec:
+  lookupPolicy:
+    local: true
+  tags:
+  - annotations:
+      opendatahub.io/notebook-python-dependencies: '[]'
+      opendatahub.io/notebook-software: '[]'
+      openshift.io/imported-from: quay.io/accorvin/ai-for-good-workshop:v2
+    from:
+      kind: DockerImage
+      name: quay.io/accorvin/ai-for-good-workshop:v2
+    generation: 2
+    importPolicy:
+      importMode: Legacy
+    name: v2
+    referencePolicy:
+      type: Source
+EOF
+```
+
+**Important** The image used for the workshop is specified in
+[vars.yaml](vars.yaml) as workbench['image']. If you need to
+change the image that is used, be sure to update this value.

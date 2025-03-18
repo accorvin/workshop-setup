@@ -1,0 +1,19 @@
+cluster:
+  rhoai_url: https://rhods-dashboard-redhat-ods-applications.apps.rosa.ai4g-workshop.bscm.p3.openshiftapps.com/
+workbench:
+  persistent_storage_capacity: 100Gi
+  oauth_proxy_image: registry.redhat.io/openshift4/ose-oauth-proxy@sha256:4f8d66597feeb32bb18699326029f9a71a5aca4a57679d636b876377c2e95695
+  #image: pytorch:2024.2
+  image: ai-for-good-workshop:v2
+  image_display_name: PyTorch
+  accelerator: t4
+  flavor: Small
+  resources:
+    limits:
+      cpu: '6'
+      memory: 40Gi
+      nvidia.com/gpu: '1'
+    requests:
+      cpu: '4'
+      memory: 40Gi
+      nvidia.com/gpu: '1'

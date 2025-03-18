@@ -1,0 +1,80 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: data-initialization-script
+  namespace: {{ project }}
+data:
+  download_workshop_data.py: |-
+    import os
+    import gdown
+    import s3fs
+
+    S3_KEY = os.environ['S3_KEY']
+    S3_SECRET = os.environ['S3_SECRET']
+
+    def download_files():
+        urls_gdrive = [
+            "https://drive.google.com/uc?id=1ACjb4oWb2p_ZA87TQcuSWvCcB4_61fA-",
+            "https://drive.google.com/uc?id=1k-SuberK2iq1NpiP1e9puNp7RVlg7I-X",
+            "https://drive.google.com/uc?id=12JdPK0A-6XJMYYOt1Sj1FNda3lkA7JPL",
+            "https://drive.google.com/uc?id=1LL6thkuKA0kVyMI39PxgsrJ1FJJDV7-u",
+            "https://drive.google.com/uc?id=1o1Hzd4yyiKyYdzfotQlEOeGTjsM8cHSw",
+            "https://drive.google.com/uc?id=1jl1XfTVlDw8y7std8a1e-sU5LuiFyi_I",
+        ]
+    
+        urls_cos = [
+            "s3://terratorch-prithvi-workshop/agb_best-epoch=68.ckpt",
+            "s3://terratorch-prithvi-workshop/granite-geospatial-biomass-dataset.zip",
+            "s3://terratorch-prithvi-workshop/hls_burn_scars.tar.gz",
+            "s3://terratorch-prithvi-workshop/multi-temporal-crop-classification-subset.tar.gz",
+            "s3://terratorch-prithvi-workshop/multicrop_best-epoch=76.ckpt",
+            "s3://terratorch-prithvi-workshop/burnscars_best-epoch=69.ckpt",
+        ]
+
+        output_files = [
+            "agb_best-epoch=68.ckpt",
+            "granite-geospatial-biomass-dataset.zip",
+            "hls_burn_scars.tar.gz",
+            "multi-temporal-crop-classification-subset.tar.gz",
+            "multicrop_best-epoch=76.ckpt",
+            "burnscars_best-epoch=69.ckpt"
+        ]
+        
+        workshop_path = os.environ['WORKSHOP_MOUNT_DIR']
+        print(f'workshop_path is {workshop_path}')
+        output_dir = f'{workshop_path}/Workshop'
+        os.makedirs(output_dir, exist_ok=True)
+        print(f'Created directory {output_dir}')
+        
+        fs = s3fs.S3FileSystem(
+            anon=False,
+            key=S3_KEY,
+            secret=S3_SECRET,
+            client_kwargs={'endpoint_url': 'https://s3.us-east.cloud-object-storage.appdomain.cloud'}
+        )
+        
+        for url_gdrive, url_cos, output in zip(urls_gdrive, urls_cos, output_files):
+            output_path = os.path.join(output_dir, output)
+            if os.path.exists(output_path):
+                print(f"File {output} already exists, skipping download.")
+                continue
+            
+            print(f"Attempting to download {output} from Google Drive...")
+            try:
+                gdown.download(url_gdrive, output_path, quiet=False)
+            except Exception as e:
+                print(f"Failed to download {output} from Google Drive: {e}")
+                print(f"Falling back to IBM Cloud Object Storage...")
+                try:
+                    fs.get(url_cos, output_path)
+                    print(f"Successfully downloaded {output} from COS.")
+                except Exception as e:
+                    print(f"Failed to download {output} from COS: {e}")
+
+    if __name__ == "__main__":
+        print("Downloading files from gdrive...")
+        download_files()
+        print("Clone repo...")
+        os.system("git clone -b organise_examples --single-branch https://github.com/IBM/terratorch.git /opt/app-root/src/terratorch")
+        print("Move notebooks and configs...")
+        os.system(f"cp /opt/app-root/src/terratorch/examples/notebooks/Prithvi_EO/* {os.environ['WORKSHOP_MOUNT_DIR']}/Workshop/")
