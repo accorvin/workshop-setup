@@ -37,6 +37,8 @@ def invite_user(username):
     
     if response.status_code == 201:
         print(f"✅ Successfully invited {username}")
+    elif 'Over invitation rate limit' in response.text:
+        print(f"❌ Failed to invite {username}. GitHub API Rate Limit hit")
     elif response.status_code == 422:
         print(f"⚠️ {username} is already a member or has a pending invite.")
     elif response.status_code == 404:
