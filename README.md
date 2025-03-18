@@ -15,6 +15,13 @@ in the second half of this README.
 A list of GitHub usernames for workshop participants can be found in [users_list.txt](users_list.txt). To
 prepare a workshop for an additional user, first add their GitHub username to that file in a new line.
 
+**Important** In order to access the workshop cluster, the user must also be added to
+[our GitHub organization](https://github.com/orgs/aiforgood-workshop/people) and
+accept the resulting invite. If you need to bulk add workshop participants,
+you can run the [manage_org_membership.py](manage_org_membership.py) sript. This
+requires a file, `.github_token.txt` which contains a GitHub token with permissions to
+write the organization membership.
+
 ### Log Into the OpenShift Cluster
 
 The script that you'll run in the next step depends on having a local client session
