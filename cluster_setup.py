@@ -21,7 +21,7 @@ def get_variables():
     pass
 
 
-def render_templates(variables, username, template_name):
+def render_templates(variables, username, safe_username, template_name):
     # Define the directory containing the template files
     template_dir = 'templates'  # Change this to the directory containing your templates
 
@@ -32,10 +32,11 @@ def render_templates(variables, username, template_name):
     template = env.get_template(template_name)
 
     # Define the variables to pass to the template
-    username_short = username[:12]
+    username_short = safe_username[:12]
     variables.update({
+        'original_username': username,
         'username_short': username_short,
-        'username': username,
+        'username': safe_username,
         'project': f'{username_short}-workshop',
         'workbench_name': f'{username_short}-workshop'
     })
@@ -62,7 +63,7 @@ def main():
         safe_username = user.lower().strip()
         print(f'Setting up environment for user {safe_username}')
         for template in TEMPLATES:
-            template_data = render_templates(variables, safe_username, template)
+            template_data = render_templates(variables, user.strip(), safe_username, template)
             template_data_yaml = yaml.safe_load(template_data)
             object = dyn_client.resources.get(api_version=template_data_yaml['apiVersion'], kind=template_data_yaml['kind'])
             object.apply(body=template_data_yaml)
