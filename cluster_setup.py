@@ -1,3 +1,4 @@
+import argparse
 import os
 import yaml
 
@@ -46,12 +47,21 @@ def render_templates(variables, username, safe_username, template_name):
 
     return rendered_output
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-u', '--user')
+    return parser.parse_args()
+
 
 def main():
+    args = parse_args()
     config.load_kube_config()
     dyn_client = DynamicClient(client.ApiClient())
-    with open(USERS_LIST_FILE) as f:
-        workshop_participants = f.readlines()
+    if args.user:
+        workshop_participants = [args.user]
+    else:
+        with open(USERS_LIST_FILE) as f:
+            workshop_participants = f.readlines()
 
     with open(VARS_FILE) as f:
         variables = yaml.safe_load(f.read())
