@@ -32,10 +32,12 @@ def render_templates(variables, username, template_name):
     template = env.get_template(template_name)
 
     # Define the variables to pass to the template
+    username_short = username[:12]
     variables.update({
+        'username_short': username_short,
         'username': username,
-        'project': f'{username}-workshop',
-        'workbench_name': f'{username}-summer-school-workshop'
+        'project': f'{username_short}-workshop',
+        'workbench_name': f'{username_short}-workshop'
     })
 
     # Render the template with the variables
