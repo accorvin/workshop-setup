@@ -80,6 +80,12 @@ in [users_list.txt](users_list.txt):
 Setting up environment for user $USERNAME
 ```
 
+Alternatively, you can run the setup script for just a single user:
+
+```
+python cluster_setup.py -u $USERNAME
+```
+
 ## OpenShift Cluster Setup
 
 For this workshop, we'll use the [Red Hat OpenShift Servie on AWS (ROSA)](https://us-east-2.console.aws.amazon.com/rosa/home) service to create
