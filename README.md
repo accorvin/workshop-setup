@@ -16,7 +16,7 @@ A list of GitHub usernames for workshop participants can be found in [users_list
 prepare a workshop for an additional user, first add their GitHub username to that file in a new line.
 
 **Important** In order to access the workshop cluster, the user must also be added to
-[our GitHub organization](https://github.com/orgs/aiforgood-workshop/people) and
+[our GitHub organization](https://github.com/orgs/ai-for-good-workshop/people) and
 accept the resulting invite. If you need to bulk add workshop participants,
 you can run the [manage_org_membership.py](manage_org_membership.py) sript. This
 requires a file, `.github_token.txt` which contains a GitHub token with permissions to
