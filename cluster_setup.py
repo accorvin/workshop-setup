@@ -1,5 +1,6 @@
 import argparse
 import os
+import requests
 import yaml
 
 from jinja2 import Environment, FileSystemLoader
@@ -53,15 +54,65 @@ def parse_args():
     return parser.parse_args()
 
 
+def get_github_user_id(github_token, headers, username):
+    """Fetch the user ID of a GitHub username."""
+    response = requests.get(f"https://api.github.com/users/{username}", headers=headers)
+    
+    if response.status_code == 200:
+        user_data = response.json()
+        return user_data["id"]
+    elif response.status_code == 404:
+        print(f"❌ User {username} not found.")
+    else:
+        print(f"❌ Failed to fetch user ID for {username}. Error: {response.text}")
+    return None
+
+def add_user_to_github_org(github_token, username):
+    headers = {
+        "Authorization": f"Bearer {github_token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28"
+    }
+    github_org = 'ai-for-good-workshop'
+    github_api_url = f"https://api.github.com/orgs/{github_org}/invitations"
+    user_id = get_github_user_id(github_token, headers, username)
+    response = requests.post(github_api_url, headers=headers, json={"invitee_id": user_id})
+    
+    if response.status_code == 201:
+        print(f"✅ Successfully invited {username}")
+    elif 'Over invitation rate limit' in response.text:
+        print(f"❌ Failed to invite {username}. GitHub API Rate Limit hit {response.text}")
+    elif response.status_code == 422:
+        print(f"⚠️ {username} is already a member or has a pending invite.")
+    elif response.status_code == 404:
+        print(f"❌ User {username} not found. Check if the username exists.")
+    else:
+        print(f"❌ Failed to invite {username}. Error: {response.text}")
+
+
+def setup_openshift_cluster(variables, dyn_client, user):
+    safe_username = user.lower().strip()
+    print(f'Setting up environment for user {safe_username}')
+    for template in TEMPLATES:
+        template_data = render_templates(variables, user.strip(), safe_username, template)
+        template_data_yaml = yaml.safe_load(template_data)
+        object = dyn_client.resources.get(api_version=template_data_yaml['apiVersion'], kind=template_data_yaml['kind'])
+        object.apply(body=template_data_yaml)
+
+
 def main():
     args = parse_args()
-    config.load_kube_config()
-    dyn_client = DynamicClient(client.ApiClient())
     if args.user:
         workshop_participants = [args.user]
     else:
         with open(USERS_LIST_FILE) as f:
             workshop_participants = f.readlines()
+
+    with open('.github_token.txt') as f:
+        github_token = f.read().strip()
+
+    config.load_kube_config()
+    dyn_client = DynamicClient(client.ApiClient())
 
     with open(VARS_FILE) as f:
         variables = yaml.safe_load(f.read())
@@ -70,14 +121,8 @@ def main():
     variables['s3_secret'] = os.environ['S3_SECRET']
 
     for user in workshop_participants:
-        safe_username = user.lower().strip()
-        print(f'Setting up environment for user {safe_username}')
-        for template in TEMPLATES:
-            template_data = render_templates(variables, user.strip(), safe_username, template)
-            template_data_yaml = yaml.safe_load(template_data)
-            object = dyn_client.resources.get(api_version=template_data_yaml['apiVersion'], kind=template_data_yaml['kind'])
-            object.apply(body=template_data_yaml)
-
+        add_user_to_github_org(github_token, user)
+        setup_openshift_cluster(variables, dyn_client, user)
 
 
 if __name__ == '__main__':
