@@ -29,20 +29,20 @@ connected to the workshop OpenShift cluster.
 
 First, [install the OpenShift Client tool](https://docs.redhat.com/en/documentation/openshift_container_platform/4.7/html/cli_tools/openshift-cli-oc#cli-about-cli_cli-developer-commands)
 
-Then, browse to the [OpenShift cluster console](https://console-openshift-console.apps.rosa.ai4g-workshop.bscm.p3.openshiftapps.com/).
+Then, browse to the [OpenShift cluster console](https://console-openshift-console.apps.rosa.ai4g-workshop.s3ey.p3.openshiftapps.com/).
 Next, click your username in the top right of the window and select `Copy login command`.
 
 This will open another tab. Click the `Display Token` button, then copy the `Log in with this token`
 command. It will look like:
 
 ```
-oc login --token=sha256~Ewz...N7I --server=https://api.ai4g-workshop.bscm.p3.openshiftapps.com:443
+oc login --token=sha256~Ewz...N7I --server=https://api.ai4g-workshop.s3ey.p3.openshiftapps.com:443
 ```
 
 Run this command in a terminal. If successful, the output should resemble the following:
 
 ```
-Logged into "https://api.ai4g-workshop.bscm.p3.openshiftapps.com:443" as "$YOUR_USERNAME$" using the token provided.
+Logged into "https://api.ai4g-workshop.s3ey.p3.openshiftapps.com:443" as "$YOUR_USERNAME$" using the token provided.
 
 You have access to 88 projects, the list has been suppressed. You can list all projects with 'oc projects'
 
@@ -55,6 +55,14 @@ First, you will need to set two environment variables, `S3_KEY`, and `S3_SECRET`
 will be used to create OpenShift secrets in each participant's project and then pull
 workshop data from cloud object storage. The values for these credentials can be found
 in the sample script [here](https://ibm-research.slack.com/archives/C083XGN35DM/p1742320250275449) 
+
+Second, you will need to [create a GitHub Fine-Grained Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
+that is owned by the `ai-for-good-workshop` and has `Read and Write` permissions on
+the organization members. Save the token value in a file in the
+root of this directory, `.github_token.txt`. This token will be used by
+the [cluster_setup.py](cluster_setup.py) script to invite workshop participants
+to the GitHub org, which is required for them to be able to access the
+workshop cluster.
 
 To run the script to prepare the workshop environment for participants, perform the following: (these
 steps were developed using python version 3.11))
