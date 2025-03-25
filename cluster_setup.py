@@ -121,7 +121,7 @@ def main():
     variables['s3_secret'] = os.environ['S3_SECRET']
 
     for user in workshop_participants:
-        add_user_to_github_org(github_token, user)
+        add_user_to_github_org(github_token, user.strip())
         setup_openshift_cluster(variables, dyn_client, user)
 
 
