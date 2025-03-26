@@ -167,3 +167,8 @@ spec:
           secret:
             defaultMode: 420
             secretName: {{ workbench_name }}-tls
+      tolerations:
+        - key: gpu_type
+          operator: Equal
+          value: {{ workbench['accelerator'] }}
+          effect: NoSchedule

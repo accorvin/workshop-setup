@@ -72,9 +72,9 @@ data:
                     print(f"Failed to download {output} from COS: {e}")
 
     if __name__ == "__main__":
-        print("Downloading files from gdrive...")
-        download_files()
+        #print("Downloading files from gdrive...")
+        #download_files()
         print("Clone repo...")
-        os.system("git clone -b organise_examples --single-branch https://github.com/IBM/terratorch.git /opt/app-root/src/terratorch")
-        print("Move notebooks and configs...")
-        os.system(f"cp /opt/app-root/src/terratorch/examples/notebooks/Prithvi_EO/* {os.environ['WORKSHOP_MOUNT_DIR']}/Workshop/")
+        os.system("git clone -b pre-release https://github.com/NASA-IMPACT/Prithvi-WxC.git /opt/app-root/src/Prithvi-WxC")
+        os.system("git clone https://github.com/IBM/terratorch.git /opt/app-root/src/terratorch")
+        os.system("cd /opt/app-root/src/terratorch && git checkout fda1edb1225f65501f1a03c19a904564c1f6852e")
