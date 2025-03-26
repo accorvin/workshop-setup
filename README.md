@@ -187,13 +187,13 @@ The container file (AKA Dockerfile) for this workbench image can be found in
 It was built with a command like:
 
 ```
-podman build -t quay.io/accorvin/ai-for-good-workshop:v2 -f workbench-notebook.CONTAINERFILE .
+podman build -t quay.io/accorvin/ai-for-good-workshop:v3 -f workbench-notebook.CONTAINERFILE .
 ```
 
 Then pushed to Quay via:
 
 ```
-podman push quay.io/accorvin/ai-for-good-workshop:v2
+podman push quay.io/accorvin/ai-for-good-workshop:v3
 ```
 
 Then, an image stream was created on the OpenShift cluster to
@@ -208,7 +208,7 @@ metadata:
   annotations:
     opendatahub.io/notebook-image-desc: ""
     opendatahub.io/notebook-image-name: ai-for-good-workshop
-    opendatahub.io/notebook-image-url: quay.io/accorvin/ai-for-good-workshop:v2
+    opendatahub.io/notebook-image-url: quay.io/accorvin/ai-for-good-workshop:v3
     opendatahub.io/recommended-accelerators: '["nvidia.com/gpu"]'
   labels:
     app.kubernetes.io/created-by: byon
@@ -223,14 +223,14 @@ spec:
   - annotations:
       opendatahub.io/notebook-python-dependencies: '[]'
       opendatahub.io/notebook-software: '[]'
-      openshift.io/imported-from: quay.io/accorvin/ai-for-good-workshop:v2
+      openshift.io/imported-from: quay.io/accorvin/ai-for-good-workshop:v3
     from:
       kind: DockerImage
-      name: quay.io/accorvin/ai-for-good-workshop:v2
+      name: quay.io/accorvin/ai-for-good-workshop:v3
     generation: 2
     importPolicy:
       importMode: Legacy
-    name: v2
+    name: v3
     referencePolicy:
       type: Source
 EOF
